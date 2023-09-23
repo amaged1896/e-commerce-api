@@ -7,7 +7,7 @@ export const appRouter = (app, express) => {
     app.use(express.json());
 
     // auth
-    app.use('/auth', authRouter);
+    app.use('/api/v1/auth', authRouter);
 
 
     // not found page router
