@@ -34,5 +34,5 @@ categoryRouter.delete('/deleteCategory/:categoryId',
     categoryController.deleteCategory
 );
 
-categoryRouter.get('/getCategories', categoryController.getCategories);
+categoryRouter.get('/getCategories', categoryController.getAllCategories);
 export default categoryRouter;

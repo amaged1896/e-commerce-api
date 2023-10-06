@@ -57,12 +57,14 @@ export const deleteCategory = catchAsync(async (req, res, next) => {
 });
 
 
-export const getCategories = catchAsync(async (req, res, next) => {
+export const getAllCategories = catchAsync(async (req, res, next) => {
     // check category 
     const categories = await categoryModel.find().populate([
         {
-            path: "createdBy",
-            select: "_id userName email status role verified"
+            path: "subcategory",
+            select: "_id name slug image",
+            // nested populate
+            populate: [{ path: "createdBy" }]
         }
     ]);
     if (!categories) return next(new AppError("There are no categories!", 404));
