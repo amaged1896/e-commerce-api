@@ -1,4 +1,13 @@
+import { Types } from 'mongoose';
 import { AppError } from './../utils/appError.js';
+
+export const isValidObjectId = (value, helper) => {
+    if (Types.ObjectId.isValid(value)) {
+        return true;
+    } else {
+        return helper.message('Invalid objectId');
+    }
+};
 
 export const isValid = (schema) => {
     return (req, res, next) => {
