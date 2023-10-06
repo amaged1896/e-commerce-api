@@ -3,8 +3,10 @@ import { catchAsync } from "../../utils/catchAsync.js";
 import cloudinary from './../../utils/cloud.js';
 import { categoryModel } from './../../../DB/model/category.model.js';
 import slugify from "slugify";
+import { sendData } from "../../utils/sendData.js";
 
 export const createCategory = catchAsync(async (req, res, next) => {
+    console.log("I'm INTO category controller");
     if (!req.file) return next(new AppError("Category image is required!"));
 
     const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, { folder: `${process.env.FOLDER_CLOUD_NAME}/category` });
@@ -15,7 +17,7 @@ export const createCategory = catchAsync(async (req, res, next) => {
         image: { id: public_id, url: secure_url },
         slug: slugify(req.body.name)
     });
-    return res.status(201).json({ status: "success", message: "Category created successfully!", results: category });
+    sendData(201, "success", "Category created successfully!", category, res);
 });
 
 
@@ -36,7 +38,7 @@ export const updateCategory = catchAsync(async (req, res, next) => {
 
     // save category
     await category.save();
-    return res.status(200).json({ status: "success", message: "Category has been updated successfully", results: category });
+    sendData(200, "success", "Category has been updated successfully!", category, res);
 });
 
 
@@ -51,7 +53,7 @@ export const deleteCategory = catchAsync(async (req, res, next) => {
 
     // delete category
     await categoryModel.findByIdAndDelete(req.params.categoryId);
-    return res.status(200).json({ status: "success", message: "Category has been deleted successfully!" });
+    sendData(200, "success", "Category has been deleted successfully!", undefined, res);
 });
 
 
@@ -64,6 +66,5 @@ export const getCategories = catchAsync(async (req, res, next) => {
         }
     ]);
     if (!categories) return next(new AppError("There are no categories!", 404));
-
-    return res.status(200).json({ status: "success", results: categories });
+    sendData(200, "success", undefined, categories, res);
 });

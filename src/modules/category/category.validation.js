@@ -1,13 +1,5 @@
 import joi from 'joi';
-import { Types } from 'mongoose';
-
-const isValidObjectId = (value, helper) => {
-    if (Types.ObjectId.isValid(value)) {
-        return true;
-    } else {
-        return helper.message('Invalid objectId');
-    }
-};
+import { isValidObjectId } from '../../middleware/validation.js';
 
 export const createCategorySchema = joi.object({
     name: joi.string().min(4).max(15).required(),

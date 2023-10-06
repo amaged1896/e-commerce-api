@@ -5,8 +5,11 @@ import { isAuthenticated } from './../../middleware/authentication.middleware.js
 import { isAuthorized } from '../../middleware/authorization.middleware.js';
 import * as categoryController from './category.controller.js';
 import { fileUpload, filterObject } from '../../utils/multer.js';
+import subcategoryRouter from '../subcategory/subcategory.router.js';
 const categoryRouter = express.Router();
 
+
+categoryRouter.use("/:categoryId/subcategory", subcategoryRouter);
 
 categoryRouter.post('/addCategory',
     isAuthenticated,
