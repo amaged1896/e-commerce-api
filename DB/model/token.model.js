@@ -17,4 +17,4 @@ const tokenSchema = mongoose.Schema({
     expiredAt: String
 }, { timestamps: true });
 
-export const tokenModel = mongoose.model('token', tokenSchema);
+export const TokenModel = mongoose.model('token', tokenSchema);

@@ -1,9 +1,10 @@
 import { AppError } from "../../utils/appError.js";
 import { catchAsync } from "../../utils/catchAsync.js";
 import cloudinary from './../../utils/cloud.js';
-import { categoryModel } from './../../../DB/model/category.model.js';
+import { CategoryModel } from './../../../DB/model/category.model.js';
 import slugify from "slugify";
 import { sendData } from "../../utils/sendData.js";
+import { SubcategoryModel } from './../../../DB/model/subcategory.model.js';
 
 export const createCategory = catchAsync(async (req, res, next) => {
     console.log("I'm INTO category controller");
@@ -11,7 +12,7 @@ export const createCategory = catchAsync(async (req, res, next) => {
 
     const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, { folder: `${process.env.FOLDER_CLOUD_NAME}/category` });
     // save category in database
-    const category = await categoryModel.create({
+    const category = await CategoryModel.create({
         name: req.body.name,
         createdBy: req.user._id,
         image: { id: public_id, url: secure_url },
@@ -23,11 +24,16 @@ export const createCategory = catchAsync(async (req, res, next) => {
 
 export const updateCategory = catchAsync(async (req, res, next) => {
     // check category 
-    const category = await categoryModel.findById(req.params.categoryId);
+    const category = await CategoryModel.findById(req.params.categoryId);
     if (!category) return next(new AppError("Category not found!", 200));
-    // name
+
+    // check owner
+    if (req.user._id.toString() !== category.createdBy.toString()) {
+        return next(new AppError("You are not authorized for that action!", 404));
+    }
+
+    // update
     category.name = req.body.name ? req.body.name : category.name;
-    // slug
     category.slug = req.body.name ? slugify(req.body.name) : category.slug;
 
     // files
@@ -44,22 +50,30 @@ export const updateCategory = catchAsync(async (req, res, next) => {
 
 export const deleteCategory = catchAsync(async (req, res, next) => {
     // check category 
-    const category = await categoryModel.findById(req.params.categoryId);
+    const category = await CategoryModel.findById(req.params.categoryId);
     if (!category) return next(new AppError("Category not found!", 200));
+
+    // check owner
+    if (req.user._id.toString() !== subcategory.createdBy.toString()) {
+        return next(new AppError("You are not authorized for that action!", 404));
+    }
 
     // delete image 
     const result = await cloudinary.uploader.destroy(category.image.id);
     console.log(result);
 
     // delete category
-    await categoryModel.findByIdAndDelete(req.params.categoryId);
+    await CategoryModel.findByIdAndDelete(req.params.categoryId);
+
+    // delete subcategories
+    await SubcategoryModel.deleteMany({ categoryId: req.params.categoryId });
     sendData(200, "success", "Category has been deleted successfully!", undefined, res);
 });
 
 
 export const getAllCategories = catchAsync(async (req, res, next) => {
     // check category 
-    const categories = await categoryModel.find().populate([
+    const categories = await CategoryModel.find().populate([
         {
             path: "subcategory",
             select: "_id name slug image",

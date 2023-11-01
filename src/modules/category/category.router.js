@@ -6,10 +6,13 @@ import { isAuthorized } from '../../middleware/authorization.middleware.js';
 import * as categoryController from './category.controller.js';
 import { fileUpload, filterObject } from '../../utils/multer.js';
 import subcategoryRouter from '../subcategory/subcategory.router.js';
+import productRouter from '../product/product.router.js';
+import { getCategoryProducts } from '../product/product.controller.js';
 const categoryRouter = express.Router();
 
 
 categoryRouter.use("/:categoryId/subcategory", subcategoryRouter);
+categoryRouter.use("/:categoryId/products", productRouter);
 
 categoryRouter.post('/addCategory',
     isAuthenticated,
@@ -35,4 +38,6 @@ categoryRouter.delete('/deleteCategory/:categoryId',
 );
 
 categoryRouter.get('/getCategories', categoryController.getAllCategories);
+categoryRouter.get('/getCategoryProducts', getCategoryProducts);
+
 export default categoryRouter;

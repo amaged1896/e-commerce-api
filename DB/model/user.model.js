@@ -5,6 +5,7 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
         min: [3, 'min length 3 characters'],
+        min: [20, 'max length 20 characters'],
     },
     email: {
         type: String,
@@ -28,7 +29,7 @@ const userSchema = mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: ['user', 'seller', 'admin'],
         default: 'user'
     },
     verified: {

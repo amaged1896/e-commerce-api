@@ -5,10 +5,10 @@ import { connection } from './DB/connection.js';
 dotenv.config();
 const app = express();
 const port = process.env.PORT;
+connection();
 
 
 // Routing
 appRouter(app, express);
 
-connection();
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

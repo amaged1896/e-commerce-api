@@ -7,7 +7,8 @@ import jwt from 'jsonwebtoken';
 import randomstring from 'randomstring';
 import { sendEmail } from './../../utils/email.js';
 import { resetPassTemp, signupTemp } from '../../utils/generateHTML.js';
-import { tokenModel } from './../../../DB/model/token.model.js';
+import { TokenModel } from './../../../DB/model/token.model.js';
+import { CartModel } from '../../../DB/model/cart.model.js';
 
 export const signup = catchAsync(async (req, res, next) => {
   const { userName, email, password } = req.body;
@@ -38,6 +39,9 @@ export const activateAccount = catchAsync(async (req, res, next) => {
   // check if the user doesn't exist
   if (!user) return next(new AppError("User not found!", 404));
 
+  // create cart
+  await CartModel.create({ user: user._id });
+
   return res.status(202).send("Your Account is now Activated!, Try to login");
 });
 
@@ -54,7 +58,7 @@ export const login = catchAsync(async (req, res, next) => {
   // generate token
   const token = jwt.sign({ id: user._id, email: user.email }, process.env.TOKEN_KEY, { expiresIn: '2d' });
   // save token to database
-  await tokenModel.create({ token, user: user._id, agent: req.headers["user-agent"] });
+  await TokenModel.create({ token, user: user._id, agent: req.headers["user-agent"] });
   user.status = "online";
   await user.save();
 
@@ -81,14 +85,14 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 
   // check user 
   if (user.forgetCode !== req.body.forgetCode) return next(new AppError("Invalid Code!", 404));
-  
+
   // update user password
   user = await userModel.findOneAndUpdate({ email: req.body.email }, { $unset: { forgetCode: 1 } });
   user.password = await bcryptjs.hash(req.body.password, Number(process.env.SALT_ROUND));
   await user.save();
 
   // Invalidate tokens
-  const tokens = await tokenModel.find({ user: user._id });
+  const tokens = await TokenModel.find({ user: user._id });
   tokens.forEach(async (token) => {
     token.isValid = false;
     await token.save();

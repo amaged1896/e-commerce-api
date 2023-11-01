@@ -3,10 +3,13 @@ import { catchAsync } from "../../utils/catchAsync.js";
 import { BrandModel } from './../../../DB/model/brand.model.js';
 import { sendData } from './../../utils/sendData.js';
 import cloudinary from './../../utils/cloud.js';
+import { AppError } from "../../utils/appError.js";
 
 
 export const createBrand = catchAsync(async (req, res, next) => {
     if (!req.file) return next(new AppError("brand image is required!"));
+    const isExist = await BrandModel.findOne({ name: req.body.name });
+    if (isExist) return next(new AppError("brand already exists!", 400));
 
     const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, { folder: `${process.env.FOLDER_CLOUD_NAME}/brand` });
     // save brand in database

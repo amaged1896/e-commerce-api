@@ -24,7 +24,11 @@ const categorySchema = mongoose.Schema({
         type: Types.ObjectId,
         ref: 'user',
         required: true
-    }
+    },
+    brand: [{
+        type: Types.ObjectId,
+        ref: 'brand',
+    }]
 }, { timestamps: true, toJSON: { virtuals: true } });
 
 categorySchema.virtual("subcategory", {
@@ -33,4 +37,4 @@ categorySchema.virtual("subcategory", {
     foreignField: "categoryId", // subcategory model
 });
 
-export const categoryModel = mongoose.model('category', categorySchema);
+export const CategoryModel = mongoose.model('category', categorySchema);

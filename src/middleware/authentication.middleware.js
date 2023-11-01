@@ -2,7 +2,7 @@
 import { AppError } from '../utils/appError.js';
 import { catchAsync } from './../utils/catchAsync.js';
 import jwt, { decode } from 'jsonwebtoken';
-import { tokenModel } from './../../DB/model/token.model.js';
+import { TokenModel } from './../../DB/model/token.model.js';
 import { userModel } from './../../DB/model/user.model.js';
 
 export const isAuthenticated = catchAsync(async (req, res, next) => {
@@ -16,7 +16,7 @@ export const isAuthenticated = catchAsync(async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.TOKEN_KEY);
     if (!decoded) return next(new AppError("Invalid token!"));
     // check database token 
-    const tokenDB = await tokenModel.findOne({ token, isValid: true });
+    const tokenDB = await TokenModel.findOne({ token, isValid: true });
     if (!tokenDB) return next(new AppError("Token Expired!"));
 
     // check user existence
